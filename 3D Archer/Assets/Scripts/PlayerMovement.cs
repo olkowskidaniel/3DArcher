@@ -4,29 +4,41 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
-    public float speed = 6f;
-    private Vector3 moveDirection = Vector3.zero;
+    Animator playerAnimator;
+    Vector3 playerMovementVector3;
+    Quaternion playerRotationQuaternion = Quaternion.identity;
+    Rigidbody playerRigidbody;
+    Vector3 moveVector;
+    bool isMoving = false;
 
-    CharacterController characterController;
-    Animator animator;
+    public FloatingJoystick floatingJoystick;
+    public float moveForce = 3f;
 
     void Start()
     {
-        characterController = GetComponent<CharacterController>();
-        animator = GetComponent<Animator>();
-        
+        playerRigidbody = GetComponent<Rigidbody>();
+        playerAnimator = GetComponent<Animator>();
     }
-  
-    void Update()
+
+    void FixedUpdate()
     {
-        moveDirection = new Vector3(Input.GetAxis("Horizontal"), 0.0f, Input.GetAxis("Vertical"));
-        moveDirection *= speed;
+        float horizontalInputValue = floatingJoystick.Horizontal;
+        float verticalInputValue = floatingJoystick.Vertical;
+        moveVector.Set(horizontalInputValue, 0f, verticalInputValue);
+        playerRigidbody.velocity = new Vector3(horizontalInputValue * moveForce, playerRigidbody.velocity.y, verticalInputValue * moveForce);
 
-        characterController.Move(moveDirection * Time.deltaTime);
+        bool hasHorizontalInput = !Mathf.Approximately(horizontalInputValue, 0f);
+        bool hasVerticalInput = !Mathf.Approximately(verticalInputValue, 0f);
+        if(hasHorizontalInput || hasVerticalInput)
+        {
+            isMoving = true;
+            transform.rotation = Quaternion.LookRotation(moveVector);
+        } else
+        {
+            isMoving = false;
 
-        if (moveDirection != Vector3.zero)
-            animator.SetBool("isWalking", true);
-        else
-            animator.SetBool("isWalking", false);
+        }
+        playerAnimator.SetBool("isMoving", isMoving);
+        playerAnimator.SetFloat("Speed", moveVector.magnitude);
     }
 }
