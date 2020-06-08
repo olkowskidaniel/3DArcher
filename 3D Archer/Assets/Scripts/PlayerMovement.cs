@@ -10,6 +10,7 @@ public class PlayerMovement : MonoBehaviour
     Rigidbody playerRigidbody;
     Vector3 moveVector;
     bool isMoving = false;
+    public WeaponManager weaponManager;
 
     public FloatingJoystick floatingJoystick;
     public float moveForce = 3f;
@@ -22,6 +23,8 @@ public class PlayerMovement : MonoBehaviour
 
     void FixedUpdate()
     {
+        playerAnimator.SetBool("hasBow", weaponManager.GetHasWeapon());
+
         float horizontalInputValue = floatingJoystick.Horizontal;
         float verticalInputValue = floatingJoystick.Vertical;
         moveVector.Set(horizontalInputValue, 0f, verticalInputValue);
@@ -36,9 +39,8 @@ public class PlayerMovement : MonoBehaviour
         } else
         {
             isMoving = false;
-
         }
         playerAnimator.SetBool("isMoving", isMoving);
-        playerAnimator.SetFloat("Speed", moveVector.magnitude);
+        playerAnimator.SetFloat("speed", moveVector.magnitude);
     }
 }
